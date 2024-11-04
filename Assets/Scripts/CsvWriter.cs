@@ -8,7 +8,6 @@ public class CsvWriter
 {
     private List<string[]> lines;
     private string[] headerLine;
-    private string delimiter;
 
     public enum FileType
     {
@@ -16,9 +15,8 @@ public class CsvWriter
         TSV
     }
 
-    public CsvWriter(FileType fileType, params string[] headers)
+    public CsvWriter(params string[] headers)
     {
-        delimiter = fileType == FileType.CSV ? "," : "\t";
         this.headerLine = headers;
         lines = new List<string[]>();
     }
@@ -68,8 +66,9 @@ public class CsvWriter
         }
     }
 
-    public bool Write(string filePath, bool append = false, Encoding encoding = null)
+    public bool Write(FileType fileType, string filePath, bool append = false, Encoding encoding = null)
     {
+        string delimiter = fileType == FileType.CSV ? "," : "\t";
         encoding ??= Encoding.UTF8;
         bool result = CheckPath(filePath, out string path);
         try
@@ -96,8 +95,9 @@ public class CsvWriter
         }
     }
 
-    public async UniTask<bool> WriteAsync(string filePath, bool append = false, Encoding encoding = null)
+    public async UniTask<bool> WriteAsync(FileType fileType, string filePath, bool append = false, Encoding encoding = null)
     {
+        string delimiter = fileType == FileType.CSV ? "," : "\t";
         encoding ??= Encoding.UTF8;
         bool result = CheckPath(filePath, out string path);
 
