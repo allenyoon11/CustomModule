@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace allen.utils
 {
-    public class CsvWriterTest : MonoBehaviour
+    public class CsvWriterTester : MonoBehaviour
     {
         private CsvWriter writer;
         private string dir;
