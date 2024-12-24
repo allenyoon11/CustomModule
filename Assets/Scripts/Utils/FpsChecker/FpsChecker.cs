@@ -5,7 +5,7 @@ using UniRx;
 using UniRx.Triggers;
 using UnityEngine;
 
-namespace allen.component
+namespace allen.utils
 {
     public class FpsChecker : MonoBehaviour
     {

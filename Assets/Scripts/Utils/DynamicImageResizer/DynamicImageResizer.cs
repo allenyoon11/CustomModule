@@ -46,7 +46,7 @@ namespace allen.utils
 
             if (child != null && targetSize != Vector2.zero)
             {
-                bool result = CalcSize(new Vector2(parentWidth, parentHeight), targetSize, out Vector2 resize);
+                bool result = CalcSizeWithAspect(new Vector2(parentWidth, parentHeight), targetSize, out Vector2 resize);
                 if (result)
                 {
                     childRect.sizeDelta = resize;
@@ -56,7 +56,7 @@ namespace allen.utils
                 }
             }
         }
-        private bool CalcSize(Vector2 parentSize, Vector2 targetSize, out Vector2 resize)
+        private bool CalcSizeWithAspect(Vector2 parentSize, Vector2 targetSize, out Vector2 resize)
         {
             resize = Vector2.zero;
 
