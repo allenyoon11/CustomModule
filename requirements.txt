@@ -1,0 +1,15 @@
+3ry Party
+- OpenCVForUnity
+- TextMesh Pro
+
+Packages
+- Google.Protobuf.3.29.2
+- Newtonsoft.Json.13.0.3
+- System.Runtime.CompilerServices.Unsafe.4.5.2 # Dependency of Google.Protobuf
+
+Plugins
+- UniRx
+- UniTask
+
+StreamingAssets
+- OpenCVForUnity

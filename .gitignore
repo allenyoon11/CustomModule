@@ -125,5 +125,4 @@ crashlytics-build.properties
 # Custom by allen
 .vsconfig
 Assets/3rd\ Party/
-[Aa]ssets/[Ss]treamingAssets/
 Assets/Plugins/
