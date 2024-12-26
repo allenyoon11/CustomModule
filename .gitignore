@@ -126,3 +126,4 @@ crashlytics-build.properties
 .vsconfig
 Assets/3rd\ Party/
 Assets/Plugins/
+Assets/StreamingAssets/FFmpegOut/

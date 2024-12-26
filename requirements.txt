@@ -13,3 +13,4 @@ Plugins
 
 StreamingAssets
 - OpenCVForUnity
+- FFmpegOut
