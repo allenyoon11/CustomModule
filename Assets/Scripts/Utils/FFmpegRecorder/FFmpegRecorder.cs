@@ -1,18 +1,137 @@
+using allen.utils;
+using Cysharp.Threading.Tasks;
+using FFmpegOut;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using UnityEditor.Presets;
 using UnityEngine;
 
-public class FFmpegRecorder : MonoBehaviour
+public class FFmpegRecorder : IDisposable
 {
-    // Start is called before the first frame update
-    void Start()
+    private FFmpegSession session;
+    private string path = null;
+    private int width = 0;
+    private int height = 0;
+    private int fps = 0;
+    private FFmpegPreset preset = FFmpegPreset.H264Default_Custom;
+    //DEV
+    private bool devLog = false;
+    
+    public FFmpegRecorder(string path, int width, int height, int fps)
     {
-        
+        if (!CheckSrcFile()) throw new Exception("Not found ffmpeg.exe in StreamingAssets");
+        if (Path.GetExtension(path) != FFmpegPresetExtensions.GetSuffix(preset)) Debug.LogError($"Wrong extension and forced change");
+        CheckOrCreateDirectory(Path.GetDirectoryName(path));
+        CheckOrGetFilename(path, out string _path, out string _filename);
+        this.path = _path;
+        this.width = width;
+        this.height = height;
+        this.fps = fps;
     }
+    ~FFmpegRecorder()
+    {
+        Dispose();
+    }
+    public void Dispose()
+    {
+        session?.Dispose();
+    }
+    
+    public async UniTask<bool> Export(List<Color32[]> frameList, Action cb = null, Action<float> progress = null)
+    {
+        try
+        {
+            if (frameList == null) throw new Exception("frameList is null.");
+            if (frameList.Count == 0) throw new Exception("frameList count is 0.");
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+            session = FFmpegSession.CreateWithOutputPath(path, width, height, fps, preset);
+            int temp_max_count = frameList.Count;
+            int temp_cur_count = 0;
+            foreach (var frame in frameList)
+            {
+                //Debug.Log($"{width}, {height}, {frame.Length}");
+                Texture2D tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
+                tex.SetPixels32(frame);
+                tex.Apply();
+                session.PushFrameDirect(tex);
+                UnityEngine.Object.Destroy(tex);
+                temp_cur_count++;
+                float percentage = (float)temp_cur_count / temp_max_count * 100;
+                if(devLog) Debug.Log($"export progress: {temp_cur_count}/{temp_max_count} | {percentage.ToString("F1")}");
+                if (progress != null) progress(percentage);
+                if (cb != null) cb();
+                await UniTask.Yield();
+            }
+            session.CompletePushFrames();
+            session.Close();
+            if(devLog) Debug.Log($"<color=yellow>[FFmpegRecorder] Finish export : duration: {width}x{height} | fps: {fps} | path: {path}</color>");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Debug.Log(ex.ToString());
+            return false;
+        }
     }
+    #region Private
+    private bool CheckOrCreateDirectory(string dir)
+    {
+        try
+        {
+            if (Directory.Exists(dir))
+            {
+                if (devLog) Debug.Log($"Directory exist already dir: {dir}");
+                return true;
+            }
+            else
+            {
+                Directory.CreateDirectory(dir);
+                if (devLog) Debug.Log($"new Directory created dir: {dir}");
+                return true;
+            }
+
+        }
+        catch (Exception e)
+        {
+            Debug.LogError(e.ToString());
+            return false;
+        }
+    }
+    private bool CheckOrGetFilename(string path, out string _path, out string _filename)
+    {
+        string dir = Path.GetDirectoryName(path);
+        string filenameWithoutExt = Path.GetFileNameWithoutExtension(path);
+        string ext = Path.GetExtension(path);
+
+        _path = path;
+        _filename = filenameWithoutExt;
+        try
+        {
+            if (File.Exists(path))
+            {
+                int i = 1;
+                while (true)
+                {
+                    _filename = string.Format("{0} ({1})", filenameWithoutExt, i++);
+                    _path = Path.Combine(dir, $"{_filename}{ext}");
+
+                    if (!File.Exists(_path)) break;
+                }
+            }
+            return true;
+        }
+        catch (Exception e)
+        {
+            Debug.LogError(e.ToString());
+            return false;
+        }
+    }
+    private bool CheckSrcFile()
+    {
+        string srcPath = Path.Combine(Application.streamingAssetsPath, "FFmpegOut/Windows/ffmpeg.exe");
+        return File.Exists(srcPath);
+    }
+    #endregion
 }

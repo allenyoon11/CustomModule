@@ -15,6 +15,7 @@ namespace allen.components
     {
         //ui
         public RawImage rawImage;
+        public bool processItSelf = false;
         public bool devLog = false;
         //basic field
         private WebCamTexture wTex;
@@ -32,32 +33,28 @@ namespace allen.components
         private long timeInterval = 10;
         private CancellationTokenSource cts;
         //for external
-        public List<FrameData> frameDataList => store;
-        private void Start()
+        public bool IsRecording => isRecording;
+        public List<FrameData> FrameDataList => store;
+
+        public void Init()
         {
             cts = new CancellationTokenSource();
             RecordFrame(cts.Token).Forget();
             ConnectWebcam(webcamIndex, width, height, fps, ref wTex);
-            SetSubscribe();
         }
-        private void OnApplicationQuit()
+        public void StartRecord()
         {
-            cts.Cancel();
+            startTime = -1;
+            nextTime = -1;
+            timeInterval = 1000 / fps;
+            store.Clear();
+            isRecording = true;
+            if (devLog) Debug.Log("[StartRecord]");
         }
-        private void SetSubscribe()
-        {
-            Observable.EveryUpdate()
-                .Where(_ => Input.GetKeyDown(KeyCode.S))
-                .Subscribe(_ =>
-                {
-                    if (isRecording) StopRecord();
-                    else StartRecord();
-                }).AddTo(this);
-        }
-
-        private void StopRecord()
+        public void StopRecord()
         {
             isRecording = false;
+
             if (rTex != null)
             {
                 rTex.Release();
@@ -71,17 +68,23 @@ namespace allen.components
                 Debug.Log($"[StopRecord] frame count : {_cnt} | duration : {_duration} | fps: {_fps}");
             }
         }
-
-        private void StartRecord()
+        #region Private
+        private void Start()
         {
-            startTime = -1;
-            nextTime = -1;
-            timeInterval = 1000 / fps;
-            store.Clear();
-            isRecording = true;
-            if (devLog) Debug.Log("[StartRecord]");
+            if (processItSelf)
+            {
+                Init();
+                SubscribeKeypress();
+            }
         }
-
+        private void OnApplicationQuit()
+        {
+            if (cts != null)
+            {
+                cts.Cancel();
+                cts = null;
+            }
+        }
         private async UniTaskVoid RecordFrame(CancellationToken token)
         {
 
@@ -99,11 +102,10 @@ namespace allen.components
                 if(curTime >= nextTime)
                 {
                     nextTime += timeInterval;
-                    AddFrame(curTime);
+                    if(isRecording) AddFrame(curTime);
                 }
             }
         }
-
         private async void AddFrame(long timestamp)
         {
             try
@@ -123,7 +125,7 @@ namespace allen.components
                     timestamp = timestamp,
                     frame = frame
                 };
-                store.Add(frameData);
+                if (isRecording) store.Add(frameData);
             }
             catch (Exception ex)
             {
@@ -165,7 +167,17 @@ namespace allen.components
             if (devLog) Debug.Log($"Connected {selectedDeviceName} | size: {wTex.width}x{wTex.height} | fps: {wTex.requestedFPS}");
             rawImage.texture = wTex;
         }
-
+        private void SubscribeKeypress()
+        {
+            Observable.EveryUpdate()
+                .Where(_ => Input.GetKeyDown(KeyCode.S))
+                .Subscribe(_ =>
+                {
+                    if (isRecording) StopRecord();
+                    else StartRecord();
+                }).AddTo(this);
+        }
+        #endregion
     }
     public class FrameData
     {

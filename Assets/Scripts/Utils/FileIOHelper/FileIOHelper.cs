@@ -29,10 +29,14 @@ namespace allen.utils
                 return false;
             }
         }
-        public static bool CheckOrGetFilename(string dir, string filename, string ext, out string _filename)
+        public static bool CheckOrGetFilename(string path, out string _path, out string _filename)
         {
-            var path = Path.Combine(dir, $"{filename}.{ext}");
-            _filename = filename;
+            string dir = Path.GetDirectoryName(path);
+            string filenameWithoutExt = Path.GetFileNameWithoutExtension(path);
+            string ext = Path.GetExtension(path);
+
+            _path = path;
+            _filename = filenameWithoutExt;
             try
             {
                 if (File.Exists(path))
@@ -40,10 +44,10 @@ namespace allen.utils
                     int i = 1;
                     while (true)
                     {
-                        _filename = string.Format("{0} ({1})", filename, i++);
-                        path = Path.Combine(dir, $"{_filename}.{ext}");
+                        _filename = string.Format("{0} ({1})", filenameWithoutExt, i++);
+                        _path = Path.Combine(dir, $"{_filename}{ext}");
 
-                        if (!File.Exists(path)) break;
+                        if (!File.Exists(_path)) break;
                     }
                 }
                 return true;
@@ -53,7 +57,6 @@ namespace allen.utils
                 Debug.LogError(e.ToString());
                 return false;
             }
-
         }
     }
 

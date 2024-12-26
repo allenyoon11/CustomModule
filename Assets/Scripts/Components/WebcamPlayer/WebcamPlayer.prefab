@@ -144,7 +144,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rawImage: {fileID: 7441778131873095370}
-  devLog: 1
+  processItSelf: 0
+  devLog: 0
 --- !u!114 &6137838141605473210
 MonoBehaviour:
   m_ObjectHideFlags: 0
