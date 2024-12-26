@@ -8,9 +8,11 @@ using Cysharp.Threading.Tasks;
 using System.Threading;
 using UnityEngine.Rendering;
 using System.Linq;
+using Unity.VisualScripting;
 
 namespace allen.components
 {
+    //ADVANCED::정확한 프레임 계산하여 store 정리
     public class WebcamPlayer : MonoBehaviour
     {
         //ui
@@ -67,6 +69,15 @@ namespace allen.components
                 float _fps = _cnt / _duration;
                 Debug.Log($"[StopRecord] frame count : {_cnt} | duration : {_duration} | fps: {_fps}");
             }
+        }
+        public List<Color32[]> GetFrameList(out float fps)
+        {
+            fps = 0;
+            if(store.Count == 0) return null;
+            int _cnt = store.Count;
+            float _duration = (float)(store.Last().timestamp - store.First().timestamp) / 1000;
+            fps = _cnt / _duration;
+            return store.Select(el => el.frame).ToList();
         }
         #region Private
         private void Start()

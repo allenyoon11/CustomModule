@@ -37,7 +37,7 @@ namespace FFmpegOut
                 + " -loglevel warning -i - " + preset.GetOptions()
                 + " -minrate 50M -maxrate 50M -b:v 50M -threads 8"
                 + " \"" + outputPath + "\"";
-            Debug.Log($"[FFmpegSession.CreateWithOutputPath] CMD: {cmd}");
+            //Debug.Log($"[FFmpegSession.CreateWithOutputPath] CMD: {cmd}");
             return new FFmpegSession(cmd);
         }
 

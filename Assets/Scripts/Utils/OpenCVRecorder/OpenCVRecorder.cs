@@ -1,49 +1,49 @@
-using allen.utils;
-using Cysharp.Threading.Tasks;
-using FFmpegOut;
+﻿using Cysharp.Threading.Tasks;
+using OpenCVForUnity.CoreModule;
+using OpenCVForUnity.VideoioModule;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using UnityEditor.Presets;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace allen.utils
 {
-    public class FFmpegRecorder : IDisposable
+    //ADVANCED::Unity API 를 사용하지 않으므로 전과정 백그라운드동작
+    //ADVANCED::병렬처리도 가능한지
+    public class OpenCVRecorder : IDisposable
     {
-        private FFmpegSession session;
+        private VideoWriter videoWriter = null;
         private string path = null;
         private int width = 0;
         private int height = 0;
         private int fps = 0;
-        private FFmpegPreset preset = FFmpegPreset.H264Default_Custom;
+        //int fourcc = VideoWriter.fourcc('M', 'P', '4', 'V'); // H.264 코덱
+        int fourcc = VideoWriter.fourcc('X', 'V', 'I', 'D'); // XVID 코덱
         //DEV
         public bool DevLog { get; set; } = false;
-
-        public FFmpegRecorder(string path)
+        public OpenCVRecorder(string path)
         {
-            if (!CheckSrcFile()) throw new Exception("Not found ffmpeg.exe in StreamingAssets");
-            if (Path.GetExtension(path) != FFmpegPresetExtensions.GetSuffix(preset)) Debug.LogError($"Wrong extension and forced change");
             CheckOrCreateDirectory(Path.GetDirectoryName(path));
             CheckOrGetFilename(path, out string _path, out string _filename);
             this.path = _path;
         }
-        public FFmpegRecorder(string path, int width, int height, int fps) : this(path)
+
+        public OpenCVRecorder(string path, int width, int height, int fps) : this(path)
         {
             this.width = width;
             this.height = height;
             this.fps = fps;
         }
-        ~FFmpegRecorder()
+        ~OpenCVRecorder()
         {
             Dispose();
         }
         public void Dispose()
         {
-            session?.Dispose();
+            videoWriter?.release();
         }
-    
         public async UniTask<bool> Export(List<Color32[]> frameList, Action cb = null, Action<float> progress = null)
         {
             try
@@ -51,17 +51,19 @@ namespace allen.utils
                 if (frameList == null) throw new Exception("frameList is null.");
                 if (frameList.Count == 0) throw new Exception("frameList count is 0.");
 
-                session = FFmpegSession.CreateWithOutputPath(path, width, height, fps, preset);
+                videoWriter = new VideoWriter();
+                Size size = new Size(width, height);
+               
+                bool isOpen = videoWriter.open(path, fourcc, fps, size, true);
+                if (!isOpen) throw new Exception($"Failed to open video file for writing: {path}");
+
                 int temp_max_count = frameList.Count;
                 int temp_cur_count = 0;
                 foreach (var frame in frameList)
                 {
-                    //Debug.Log($"{width}, {height}, {frame.Length}");
-                    Texture2D tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
-                    tex.SetPixels32(frame);
-                    tex.Apply();
-                    session.PushFrameDirect(tex);
-                    UnityEngine.Object.Destroy(tex);
+                    Mat matFrame = ConvertColor32ToMat(frame, width, height, flip: true, flipCode: 0);
+                    videoWriter.write(matFrame);
+                    matFrame.Dispose();
 
                     temp_cur_count++;
                     float percentage = (float)temp_cur_count / temp_max_count * 100;
@@ -72,22 +74,39 @@ namespace allen.utils
 
                     await UniTask.Yield();
                 }
-                session.CompletePushFrames();
-                session.Close();
-                if (DevLog) Debug.Log($"<color=yellow>[FFmpegRecorder] Finish export : duration: {width}x{height} | fps: {fps} | path: {path}</color>");
+                if(DevLog) Debug.Log($"<color=yellow>[OpenCVRecorder] Finish export : duration: {width}x{height} | fps: {fps} | path: {path}</color>");
                 return true;
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 Debug.LogError(ex.ToString());
                 return false;
             }
             finally
             {
-                session?.Dispose();
+                videoWriter?.release();
             }
         }
         #region Private
+        private Mat ConvertColor32ToMat(Color32[] frame, int width, int height, bool flip, int flipCode = 0)
+        {
+            Mat mat = new Mat(height, width, CvType.CV_8UC3); // OpenCV에서 BGR 포맷으로 생성
+            byte[] data = new byte[frame.Length * 3];
+
+            for (int i = 0; i < frame.Length; i++)
+            {
+                data[i * 3 + 0] = frame[i].b; // Blue 채널
+                data[i * 3 + 1] = frame[i].g; // Green 채널
+                data[i * 3 + 2] = frame[i].r; // Red 채널
+            }
+
+            mat.put(0, 0, data);
+            if (flip)
+            {
+                Core.flip(mat, mat, flipCode);
+            }
+            return mat;
+        }
         private bool CheckOrCreateDirectory(string dir)
         {
             try
@@ -139,11 +158,6 @@ namespace allen.utils
                 Debug.LogError(e.ToString());
                 return false;
             }
-        }
-        private bool CheckSrcFile()
-        {
-            string srcPath = Path.Combine(Application.streamingAssetsPath, "FFmpegOut/Windows/ffmpeg.exe");
-            return File.Exists(srcPath);
         }
         #endregion
     }

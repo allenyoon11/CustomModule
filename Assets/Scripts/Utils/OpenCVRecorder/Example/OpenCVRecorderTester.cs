@@ -1,31 +1,27 @@
 using allen.components;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using TMPro;
 using UniRx;
 using UnityEngine;
-using UnityEngine.UIElements;
+using System.Linq;
+using TMPro;
 
-namespace allen.utils
+namespace allen.utils 
 {
-    public class FFmpegRecorderTester : MonoBehaviour
+    public class OpenCVRecorderTester : MonoBehaviour
     {
         public TMP_Text textProgress;
         public WebcamPlayer player;
-        private FFmpegRecorder recorder;
+        private OpenCVRecorder recorder;
         private List<FrameData> frameDataList => player.FrameDataList;
         private bool isRecording => player.IsRecording;
         public string dir => Path.Combine(Application.persistentDataPath, "data");
-        public string filename => "ffmpegTestVideo.mp4";
+        public string filename => "opencvTestVideo.mp4";
+
         private int width = 640;
         private int height = 360;
-        private void Awake()
-        {
-        }
-        public void Start()
+        private void Start()
         {
             Init();
             SubscribeKeypress();
@@ -38,7 +34,7 @@ namespace allen.utils
         {
             string path = Path.Combine(dir, filename);
             List<Color32[]> frameList = GetFrameList(out float fps);
-            recorder = new FFmpegRecorder(path, width, height, (int)fps);
+            recorder = new OpenCVRecorder(path, width, height, (int)fps);
             recorder.DevLog = true;
 
             await recorder.Export(frameList, null, (progress) =>
@@ -63,7 +59,6 @@ namespace allen.utils
                     Export();
                 }).AddTo(this);
         }
-
     }
 
 }
