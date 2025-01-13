@@ -59,20 +59,28 @@ namespace allen.utils
 
                 int temp_max_count = frameList.Count;
                 int temp_cur_count = 0;
-                foreach (var frame in frameList)
+
+                int yieldInterval = 10; // 매 n번째 루프마다 Yield
+                int loopCount = 0;
+                for (int i = 0; i < frameList.Count; i++)
                 {
-                    Mat matFrame = ConvertColor32ToMat(frame, width, height, flip: true, flipCode: 0);
+                    Mat matFrame = ConvertColor32ToMat(frameList[i], width, height, flip: true, flipCode: 0);
                     videoWriter.write(matFrame);
                     matFrame.Dispose();
 
                     temp_cur_count++;
+                    loopCount++;
+
                     float percentage = (float)temp_cur_count / temp_max_count * 100;
                     if (DevLog) Debug.Log($"export progress: {temp_cur_count}/{temp_max_count} | {percentage.ToString("F1")}");
 
                     if (progress != null) progress(percentage);
                     if (cb != null) cb();
 
-                    await UniTask.Yield();
+                    if (loopCount % yieldInterval == 0)
+                    {
+                        await UniTask.Yield();
+                    }
                 }
                 if(DevLog) Debug.Log($"<color=yellow>[OpenCVRecorder] Finish export : duration: {width}x{height} | fps: {fps} | path: {path}</color>");
                 return true;

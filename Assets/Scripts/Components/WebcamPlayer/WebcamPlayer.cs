@@ -25,8 +25,8 @@ namespace allen.components
         private List<FrameData> store = new List<FrameData>();
         //changable field
         private int webcamIndex = 0;
-        private int width = 680;
-        private int height = 480;
+        private int width = 640;
+        private int height = 360;
         private int fps = 100;
         //control-record field
         private bool isRecording = false;
@@ -38,7 +38,7 @@ namespace allen.components
         public bool IsRecording => isRecording;
         public List<FrameData> FrameDataList => store;
 
-        public void Init()
+        public void InitWebcam(int idx = 0, int width = 640, int height = 360, int fps = 30)
         {
             cts = new CancellationTokenSource();
             RecordFrame(cts.Token).Forget();
@@ -84,7 +84,7 @@ namespace allen.components
         {
             if (processItSelf)
             {
-                Init();
+                InitWebcam();
                 SubscribeKeypress();
             }
         }

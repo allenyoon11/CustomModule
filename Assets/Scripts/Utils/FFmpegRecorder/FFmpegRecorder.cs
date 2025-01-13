@@ -1,4 +1,4 @@
-using allen.utils;
+﻿using allen.utils;
 using Cysharp.Threading.Tasks;
 using FFmpegOut;
 using System;
@@ -10,6 +10,9 @@ using UnityEngine;
 
 namespace allen.utils
 {
+    /// <summary>
+    /// v1.0.02
+    /// </summary>
     public class FFmpegRecorder : IDisposable
     {
         private FFmpegSession session;
@@ -43,34 +46,41 @@ namespace allen.utils
         {
             session?.Dispose();
         }
-    
         public async UniTask<bool> Export(List<Color32[]> frameList, Action cb = null, Action<float> progress = null)
         {
             try
             {
+
                 if (frameList == null) throw new Exception("frameList is null.");
                 if (frameList.Count == 0) throw new Exception("frameList count is 0.");
 
                 session = FFmpegSession.CreateWithOutputPath(path, width, height, fps, preset);
                 int temp_max_count = frameList.Count;
                 int temp_cur_count = 0;
-                foreach (var frame in frameList)
+
+                Texture2D tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
+                int yieldInterval = 2; // 매 n번째 루프마다 Yield
+                int loopCount = 0;
+
+                for (int i = 0; i < frameList.Count; i++)
                 {
                     //Debug.Log($"{width}, {height}, {frame.Length}");
-                    Texture2D tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
-                    tex.SetPixels32(frame);
+                    tex.SetPixels32(frameList[i]);
                     tex.Apply();
                     session.PushFrameDirect(tex);
-                    UnityEngine.Object.Destroy(tex);
 
                     temp_cur_count++;
+                    loopCount++;
                     float percentage = (float)temp_cur_count / temp_max_count * 100;
                     if (DevLog) Debug.Log($"export progress: {temp_cur_count}/{temp_max_count} | {percentage.ToString("F1")}");
 
                     if (progress != null) progress(percentage);
                     if (cb != null) cb();
 
-                    await UniTask.Yield();
+                    if (loopCount % yieldInterval == 0)
+                    {
+                        await UniTask.Yield();
+                    }
                 }
                 session.CompletePushFrames();
                 session.Close();
