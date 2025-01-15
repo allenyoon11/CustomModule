@@ -1,4 +1,3 @@
-using allen.components;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -7,8 +6,9 @@ using UnityEngine;
 using System.Linq;
 using TMPro;
 using System;
+using neuroears.allen.utils.webcam;
 
-namespace allen.utils 
+namespace neuroears.allen.utils 
 {
     /// <summary>
     /// v1.0.02
@@ -19,7 +19,7 @@ namespace allen.utils
         public TMP_Text textProgress;
         public WebcamPlayer player;
         private OpenCVRecorder recorder;
-        private List<FrameData> frameDataList => player.FrameDataList;
+        private List<FrameData<Color32[]>> frameDataList => player.GetFrameData();
         private bool isRecording => player.IsRecording;
         public string dir => Path.Combine(Application.persistentDataPath, "data");
         public string filename => "opencvTestVideo.mp4";
@@ -53,7 +53,7 @@ namespace allen.utils
             player.StartRecord();
         }
         private void StopRecord() => player.StopRecord();
-        private List<Color32[]> GetFrameList(out float fps) => player.GetFrameList(out fps);
+        private List<Color32[]> GetFrameList(out float fps) => player.GetRawData(out fps);
         private async void Export()
         {
             string path = Path.Combine(dir, filename);

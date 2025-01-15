@@ -1,4 +1,3 @@
-using allen.components;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -7,9 +6,9 @@ using System.Linq;
 using TMPro;
 using UniRx;
 using UnityEngine;
-using UnityEngine.UIElements;
+using neuroears.allen.utils.webcam;
 
-namespace allen.utils
+namespace neuroears.allen.utils
 {
     public class FFmpegRecorderTester : MonoBehaviour
     {
@@ -17,7 +16,7 @@ namespace allen.utils
         public TMP_Text textProgress;
         public WebcamPlayer player;
         private FFmpegRecorder recorder;
-        private List<FrameData> frameDataList => player.FrameDataList;
+        private List<FrameData<Color32[]>> frameDataList => player.GetFrameData();
         private bool isRecording => player.IsRecording;
         public string dir => Path.Combine(Application.persistentDataPath, "data");
         public string filename => "ffmpegTestVideo.mp4";
@@ -55,7 +54,7 @@ namespace allen.utils
             player.StartRecord();
         }
         private void StopRecord() => player.StopRecord();
-        private List<Color32[]> GetFrameList(out float fps) => player.GetFrameList(out fps);
+        private List<Color32[]> GetFrameList(out float fps) => player.GetRawData(out fps);
         private async void Export()
         {
             string path = Path.Combine(dir, filename);

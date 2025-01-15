@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace allen.utils
+namespace neuroears.allen.utils
 {
     public class GameObjectPool<T> where T : MonoBehaviour
     {

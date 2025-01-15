@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace allen.utils
+namespace neuroears.allen.utils
 {
     public class ResizeImageCalculator
     {

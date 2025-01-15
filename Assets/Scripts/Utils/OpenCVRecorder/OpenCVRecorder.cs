@@ -8,7 +8,7 @@ using System.IO;
 using Unity.VisualScripting;
 using UnityEngine;
 
-namespace allen.utils
+namespace neuroears.allen.utils
 {
     //ADVANCED::Unity API 를 사용하지 않으므로 전과정 백그라운드동작
     //ADVANCED::병렬처리도 가능한지

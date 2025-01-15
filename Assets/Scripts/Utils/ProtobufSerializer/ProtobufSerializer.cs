@@ -3,7 +3,7 @@ using System;
 using System.IO;
 using UnityEngine;
 
-namespace allen.utils
+namespace neuroears.allen.utils
 {
     public class ProtobufSerializer
     {
