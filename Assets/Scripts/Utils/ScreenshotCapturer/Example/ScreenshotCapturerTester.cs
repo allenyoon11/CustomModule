@@ -3,17 +3,21 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ScreenshotCapturerTester : MonoBehaviour
+namespace neuroears.allen.utils
 {
-    public Camera cam;
-    private ScreenshotCapturer capturer;
-
-    private void Awake()
+    public class ScreenshotCapturerTester : MonoBehaviour
     {
-        if(cam == null)
+        public Camera cam;
+        private ScreenshotCapturer capturer;
+
+        private void Awake()
         {
-            throw new Exception("cam is null");
+            if(cam == null)
+            {
+                throw new Exception("cam is null");
+            }
+            //capturer = new ScreenshotCapturer(cam, );
         }
-        //capturer = new ScreenshotCapturer(cam, );
     }
+
 }

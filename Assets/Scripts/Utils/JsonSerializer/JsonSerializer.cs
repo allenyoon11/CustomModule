@@ -4,7 +4,7 @@ using System.Text;
 using UnityEngine;
 using Newtonsoft.Json;
 
-namespace allen.utils
+namespace neuroears.allen.utils
 {
     public class JsonSerializer
     {

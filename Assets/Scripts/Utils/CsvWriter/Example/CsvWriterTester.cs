@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
-namespace allen.utils
+namespace neuroears.allen.utils
 {
     public class CsvWriterTester : MonoBehaviour
     {

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace allen.utils
+namespace neuroears.allen.utils
 {
 
     [RequireComponent(typeof (RectTransform))]

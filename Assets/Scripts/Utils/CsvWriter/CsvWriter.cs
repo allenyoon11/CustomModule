@@ -5,7 +5,7 @@ using System.Text;
 using UnityEngine;
 using Cysharp.Threading.Tasks;
 
-namespace allen.utils
+namespace neuroears.allen.utils
 {
     public class CsvWriter
     {
