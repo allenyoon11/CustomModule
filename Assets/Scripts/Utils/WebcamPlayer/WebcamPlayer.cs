@@ -11,9 +11,14 @@ using UnityEngine.UI;
 
 namespace neuroears.allen.utils.webcam
 {
+    #region Summary
     /// <summary>
-    /// v1.0.03
+    /// v1.0.03::add processQueue
+    /// v1.0.02::optimize for 100fps
+    /// v1.0.01::
+    /// v1.0.00::
     /// </summary>
+    #endregion
     public class WebcamPlayer : MonoBehaviour
     {
         public RawImage rawImage;
@@ -36,6 +41,8 @@ namespace neuroears.allen.utils.webcam
         private long timeInterval = 10; //10ms = 100fps
         private CancellationTokenSource cts = null;
         private Subject<(long timestamp, WebCamTexture wTex)> OnTextureUpdated = new Subject<(long timestamp, WebCamTexture wTex)>();
+        private Queue<(long timestamp, AsyncGPUReadbackRequest request)> processingQueue = new();
+
         //External
         public int WebcamIndex => webcamIndex;
         public int Width => width;
@@ -196,6 +203,52 @@ namespace neuroears.allen.utils.webcam
                     store.AddFrame(timestamp, frame);
                     //OnWebcamFrameUpdated.OnNext((timestamp, frame)); //INFO::when you need; (for external)
                 }).AddTo(this);
+
+            OnTextureUpdated
+                .ObserveOnMainThread()
+                .Subscribe(tuple =>
+                {
+                    var (timestamp, wTex) = tuple;
+
+                    // RenderTexture에 WebcamTexture 블리팅
+                    Graphics.Blit(wTex, rTex);
+
+                    // AsyncGPUReadback 비동기 처리
+                    AsyncGPUReadback.Request(rTex, 0, request =>
+                    {
+                        lock (processingQueue)
+                        {
+                            processingQueue.Enqueue((timestamp, request));
+                        }
+                        ProcessQueue();
+                    });
+                }).AddTo(this);
+        }
+        private void ProcessQueue()
+        {
+            lock (processingQueue)
+            {
+                while (processingQueue.Count > 0)
+                {
+                    var (timestamp, request) = processingQueue.Peek();
+
+                    if (request.done)
+                    {
+                        if (request.hasError)
+                        {
+                            Debug.LogError("AsyncGPUReadback request failed.");
+                            processingQueue.Dequeue();
+                            continue;
+                        }
+                        store.AddFrame(timestamp, request.GetData<Color32>().ToArray());
+                        processingQueue.Dequeue();
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+            }
         }
         #endregion
 
