@@ -7,6 +7,9 @@ using Cysharp.Threading.Tasks;
 
 namespace neuroears.allen.utils
 {
+    /// <summary>
+    /// v1.0.02
+    /// </summary>
     public class CsvWriter
     {
         private List<string[]> lines;

@@ -17,7 +17,7 @@ namespace neuroears.allen.utils
         private string path = null;
         private int width = 0;
         private int height = 0;
-        private int fps = 0;
+        private float fps = 0f;
         private FFmpegPreset preset = FFmpegPreset.H264Default_Custom;
         //DEV
         public bool DevLog { get; set; } = false;
@@ -30,7 +30,7 @@ namespace neuroears.allen.utils
             CheckOrGetFilename(path, out string _path, out string _filename);
             this.path = _path;
         }
-        public FFmpegRecorder(string path, int width, int height, int fps) : this(path)
+        public FFmpegRecorder(string path, int width, int height, float fps) : this(path)
         {
             this.width = width;
             this.height = height;
