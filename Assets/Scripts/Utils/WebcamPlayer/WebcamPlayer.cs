@@ -91,14 +91,15 @@ namespace neuroears.allen.utils.webcam
                 wTex = new WebCamTexture(deviceName, width, height, fps);
                 rawImage.texture = wTex;
                 wTex.Play();
-                
+
                 //INFO::After Play, cam switches to a supported resolution.
-                if (width != wTex.width || height != wTex.height)
+                if (width != wTex.width || height != wTex.height || fps != (int)wTex.requestedFPS)
                 {
                     width = wTex.width;
                     height = wTex.height;
+                    fps = (int)wTex.requestedFPS;
                 }
-                
+
                 resizer?.Resize();
                 if(store == null)
                 {
