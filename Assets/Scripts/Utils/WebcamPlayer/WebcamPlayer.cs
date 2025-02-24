@@ -76,7 +76,7 @@ namespace neuroears.allen.utils.webcam
             if (resizer == null) resizer = GetComponent<DynamicImageResizer>();
             ChangeMirrorMode(mirrorMode);
         }
-        public virtual void LoadWebcam(IWebcamDataStore store = null)
+        public virtual void LoadWebcam()
         {
             WebCamDevice[] devices = WebCamTexture.devices;
             if (devices.Length > 0 && webcamIndex < devices.Length)
