@@ -14,7 +14,7 @@ namespace neuroears.allen.utils
     {
         public TMP_Text textTime;
         public TMP_Text textProgress;
-        public WebcamPlayer player;
+        public WebcamPlayer_v2 player;
         private FFmpegRecorder recorder;
         private List<FrameData<Color32[]>> frameDataList => player.GetFrameData();
         private bool isRecording => player.IsRecording;

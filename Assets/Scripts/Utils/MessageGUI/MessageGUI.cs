@@ -7,9 +7,9 @@ namespace neuroears.allen.utils
 {
     public abstract class MessageGUI : MonoBehaviour
     {
-        public int fontSize = 16;
+        public int fontSize = 30;
         public Color fontColor = Color.black;
-        public float textBoxWidth = 200;
+        public float textBoxWidth = 300;
         public float textBoxHeight = 50;
         public ScreenPosition currentScreenPosition = ScreenPosition.BottomRight;
         //
