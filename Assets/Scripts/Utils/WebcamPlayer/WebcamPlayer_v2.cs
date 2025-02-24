@@ -30,6 +30,7 @@ namespace neuroears.allen.utils.webcam
         private long nextTimeInterval = 0;
         private long timeInterval = 10; //10ms = 100fps
         private CancellationTokenSource cts = null;
+        //
         private Subject<(long timestamp, WebCamTexture wTex)> OnTextureUpdated = new Subject<(long timestamp, WebCamTexture wTex)>();
         private Queue<(long timestamp, AsyncGPUReadbackRequest request)> processingQueue = new();
         //public Subject<(long timestamp, Color32[] frame)> OnWebcamFrameUpdated { get; private set; } = new Subject<(long timestamp, Color32[] frame)>();
