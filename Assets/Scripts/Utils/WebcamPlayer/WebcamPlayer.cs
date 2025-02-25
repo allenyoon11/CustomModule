@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor.Experimental.GraphView;
@@ -8,6 +9,7 @@ namespace neuroears.allen.utils.webcam
 {
     #region Summary
     /// <summary>
+    /// v1.0.03::find device by name or idx;
     /// v1.0.02::set change info after load webcam
     /// v1.0.01::add resizer
     /// v1.0.00::basic
@@ -19,7 +21,8 @@ namespace neuroears.allen.utils.webcam
         public bool mirrorMode = true;
         public bool processItSelf = true;
         public bool showLog = true;
-        public int webcamIndex = 0;
+        public int webcamIndex = -1;
+        public string deviceName = ""; // Arducam OV9782 USB Camera
         public int width = 640;
         public int height = 360;
         public int fps = 100;
@@ -28,8 +31,6 @@ namespace neuroears.allen.utils.webcam
         protected bool isLoaded = false;
         protected WebCamTexture wTex;
         protected DynamicImageResizer resizer;
-        //
-        private string deviceName;
         //
         //External
         public int WebcamIdx => webcamIndex;
@@ -79,9 +80,34 @@ namespace neuroears.allen.utils.webcam
         public virtual void LoadWebcam()
         {
             WebCamDevice[] devices = WebCamTexture.devices;
-            if (devices.Length > 0 && webcamIndex < devices.Length)
+            WebCamDevice targetDevice = default;
+            //v1.0.03::find device by name or idx;
+            if (devices.Length == 0)
             {
-                deviceName = devices[webcamIndex].name;
+                throw new Exception("not found any devices");
+            }
+            else if (devices.Length > 0)
+            {
+                if (string.IsNullOrEmpty(deviceName) && webcamIndex < 0) throw new Exception("enter device name or webcamIndex");
+                if (webcamIndex > 0)
+                {
+                    targetDevice = devices[webcamIndex];
+                    if (string.IsNullOrEmpty(deviceName))
+                    {
+                        deviceName = targetDevice.name;
+                    }
+                    else
+                    {
+                        if (targetDevice.name != deviceName) throw new Exception($"found device '{targetDevice.name}' by idx '{webcamIndex}'. but not match name '{deviceName}'");
+                    }
+                }
+                else
+                {
+                    webcamIndex = Array.FindIndex(devices, el => el.name == deviceName);
+                    if (webcamIndex < 0) throw new Exception($"not found device by name '{targetDevice.name}'");
+                    targetDevice = devices[webcamIndex];
+                }
+
                 wTex = new WebCamTexture(deviceName, width, height, fps);
                 rawImage.texture = wTex;
                 wTex.Play();
@@ -91,11 +117,11 @@ namespace neuroears.allen.utils.webcam
                 {
                     width = wTex.width;
                 }
-                if(this.height != wTex.height)
+                if (this.height != wTex.height)
                 {
                     height = wTex.height;
                 }
-                if(this.fps != (int)wTex.requestedFPS)
+                if (this.fps != (int)wTex.requestedFPS)
                 {
                     this.fps = (int)wTex.requestedFPS;
                 }
