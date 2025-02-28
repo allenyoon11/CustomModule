@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -89,7 +88,7 @@ namespace neuroears.allen.utils.webcam
             else if (devices.Length > 0)
             {
                 if (string.IsNullOrEmpty(deviceName) && webcamIndex < 0) throw new Exception("enter device name or webcamIndex");
-                if (webcamIndex > 0)
+                if (webcamIndex >= 0)
                 {
                     targetDevice = devices[webcamIndex];
                     if (string.IsNullOrEmpty(deviceName))
