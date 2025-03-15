@@ -12,7 +12,7 @@ namespace neuroears.allen.utils
         public string ext;
         //
         private string[] supportedExt = { "png", "jpg" };
-        private bool isReadToWrite = false;
+        private bool isReadyToWrite = false;
         public ImageWriter(string dir, string filenameWithoutExt, string ext)
         {
             if(!string.IsNullOrEmpty(dir))
@@ -31,19 +31,19 @@ namespace neuroears.allen.utils
             {
                 Directory.CreateDirectory(dir);
             }
-            isReadToWrite = true;
+            isReadyToWrite = true;
         }
 
-        public void Save(Texture texture)
+        public void Save(Texture texture, bool showLog = false)
         {
-            if(!isReadToWrite)
+            if(!isReadyToWrite)
             {
                 Debug.LogError("not ready");
                 return;
             }
             if (texture == null)
             {
-                Debug.LogError("Texture is null! Cannot save.");
+                Debug.LogError("texture is null");
                 return;
             }
 
@@ -77,7 +77,7 @@ namespace neuroears.allen.utils
 
             // 파일 저장
             File.WriteAllBytes(filePath, bytes);
-            Debug.Log($"Image saved to: {filePath}");
+            if(showLog) Debug.Log($"Image saved to: {filePath}");
         }
 
         private Texture2D ConvertToTexture2D(Texture texture)
