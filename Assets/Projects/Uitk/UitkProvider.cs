@@ -11,25 +11,29 @@ namespace neuroears.allen.uitk
             VisualTreeAsset asset = Resources.Load<VisualTreeAsset>(uxmlPath);
             if (asset == null)
             {
-                throw new System.Exception($"[LoadElement] fail load uxml");
+                throw new System.Exception($"[LoadElement] fail load uxml {uxmlPath}");
             }
-            StyleSheet style = Resources.Load<StyleSheet>(ussPath);
-            if (style == null)
+            StyleSheet style = null;
+            if (!string.IsNullOrEmpty(ussPath))
             {
-                throw new System.Exception($"[LoadElement] fail load uss");
+                style = Resources.Load<StyleSheet>(ussPath);
+                if (style == null)
+                {
+                    throw new System.Exception($"[LoadElement] fail load uss {ussPath}");
+                }
             }
             if (string.IsNullOrEmpty(name))
             {
                 //TemplateContainer
                 VisualElement el = asset.Instantiate();
-                el.styleSheets.Add(style);
+                if (style != null) el.styleSheets.Add(style);
                 el.style.flexGrow = 1;
                 return el;
             }
             else
             {
                 VisualElement el = asset.Instantiate().Q<VisualElement>(name);
-                el.styleSheets.Add(style);
+                if (style != null) el.styleSheets.Add(style);
                 return el;
             }
         }
