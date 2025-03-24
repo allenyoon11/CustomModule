@@ -34,6 +34,8 @@ namespace neuroears.allen.utils
             isReadyToWrite = true;
         }
 
+        public ImageWriter(string filenameWithoutExt, string ext) : this(Path.Combine(Application.persistentDataPath, "data"), filenameWithoutExt, ext) { }
+
         public void Save(Texture texture, bool showLog = false)
         {
             if(!isReadyToWrite)
