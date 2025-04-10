@@ -29,6 +29,7 @@ namespace neuroears.allen.utils
         private float time = 0f;
         private void Awake()
         {
+            Application.targetFrameRate = 30;
         }
         public void Start()
         {
