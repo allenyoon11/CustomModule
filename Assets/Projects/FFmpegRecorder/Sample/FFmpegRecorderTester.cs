@@ -29,7 +29,7 @@ namespace neuroears.allen.utils
         private float time = 0f;
         private void Awake()
         {
-            Application.targetFrameRate = 30;
+            Application.targetFrameRate = 60;
         }
         public void Start()
         {
@@ -58,9 +58,12 @@ namespace neuroears.allen.utils
         private List<Color32[]> GetFrameList(out float fps) => player.GetRawData(out fps);
         private async void Export()
         {
-            string path = Path.Combine(dir, filename);
+            string _path = Path.Combine(dir, filename);
+            int _width = player.Width;
+            int _height = player.Height;
+
             List<Color32[]> frameList = GetFrameList(out float fps);
-            recorder = new FFmpegRecorder(path, width, height, (int)fps);
+            recorder = new FFmpegRecorder(_path, _width, _height, (int)fps);
             recorder.DevLog = true;
 
             await recorder.Export(frameList, null, (progress) =>

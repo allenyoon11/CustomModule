@@ -1,4 +1,4 @@
-﻿using Cysharp.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using FFmpegOut;
 using System;
 using System.Collections;
@@ -32,6 +32,7 @@ namespace neuroears.allen.utils
         }
         public FFmpegRecorder(string path, int width, int height, float fps) : this(path)
         {
+            Debug.Log($"{path} | {width} | {height} | {fps}");
             this.width = width;
             this.height = height;
             this.fps = fps;
@@ -62,7 +63,7 @@ namespace neuroears.allen.utils
 
                 for (int i = 0; i < frameList.Count; i++)
                 {
-                    //Debug.Log($"{width}, {height}, {frame.Length}");
+                    Debug.Log($"{width}, {height}, {frameList[i].Length}");
                     tex.SetPixels32(frameList[i]);
                     tex.Apply();
                     session.PushFrameDirect(tex);
