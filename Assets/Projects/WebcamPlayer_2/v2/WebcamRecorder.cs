@@ -9,7 +9,7 @@ using TMPro;
 using FFmpegOut;
 using UnityEngine.Rendering;
 
-namespace neuroears.allen.utils.webcam2.record3
+namespace neuroears.allen.utils.webcam2.record2
 {
     [RequireComponent(typeof(WebcamPlayer))]
     public class WebcamRecorder : MonoBehaviour
@@ -26,14 +26,12 @@ namespace neuroears.allen.utils.webcam2.record3
         //
         private long startTime = 0;
         private long currentTime = 0;
-        private long nextTime = 0;
-        private long timeInterval = 0;
         private bool isRecording = false;
         public WebCamTexture WebcamTex => player.WebcamTex;
 
         private void Awake()
         {
-            Application.targetFrameRate = 60;
+            Application.targetFrameRate = 120;
             player = GetComponent<WebcamPlayer>();
             frameQueue = new ConcurrentQueue<FrameData>();
         }
@@ -56,13 +54,12 @@ namespace neuroears.allen.utils.webcam2.record3
         }
         public void StartRecord()
         {
+            Debug.Log($"[StartRecord] {3}");
             cts = new CancellationTokenSource();
             frameQueue.Clear();
             startTime = 0;
             currentTime = 0;
             isRecording = true;
-            timeInterval = 1000 / requestedFPS;
-            Debug.Log($"[StartRecord] {3} {timeInterval}");
             CaptureLoopAsync(cts.Token).Forget();
             //EncodeLoopAsync(cts.Token).Forget();
         }
@@ -71,14 +68,12 @@ namespace neuroears.allen.utils.webcam2.record3
             cts.Cancel();
             isRecording = false;
             //
-            if (frameQueue.Count > 0)
-            {
-                var lastFrame = frameQueue.Last();
-                long duration = lastFrame.timestampMs - startTime;
-                int count = frameQueue.Count;
-                float fps = (float)count / duration * 1000;
-                Debug.Log($"[StopRecord] count: {count} | duration: {duration} | fps: {fps}");
-            }
+            var lastFrame = frameQueue.Last();
+            long duration = lastFrame.timestampMs - startTime;
+            int count = frameQueue.Count;
+            float fps = (float)count / duration * 1000;
+
+            Debug.Log($"[StopRecord] count: {count} | duration: {duration} | fps: {fps}");
         }
 
 
@@ -86,35 +81,29 @@ namespace neuroears.allen.utils.webcam2.record3
         {
             while (!token.IsCancellationRequested)
             {
-                //await UniTask.WaitForEndOfFrame();
+                await UniTask.WaitForEndOfFrame();
                 if (rTex == null) rTex = new(WebcamTex.width, WebcamTex.height, 0);
                 Graphics.Blit(WebcamTex, rTex);
                 currentTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                 if (startTime == 0) startTime = currentTime;
-                if (nextTime == 0) nextTime = currentTime;
-                if (currentTime >= nextTime)
+
+                await AsyncGPUReadback.Request(rTex, 0, request =>
                 {
-                    Debug.Log($"{currentTime} | {nextTime}");
-                    await AsyncGPUReadback.Request(rTex, 0, request =>
+                    if (request.hasError)
                     {
-                        if (request.hasError)
-                        {
-                            Debug.LogError("GPU Readback Error");
-                            return;
-                        }
+                        Debug.LogError("GPU Readback Error");
+                        return;
+                    }
 
-                        var data = request.GetData<byte>();
-                        byte[] frameBytes = new byte[data.Length];
-                        data.CopyTo(frameBytes);
+                    var data = request.GetData<byte>();
+                    byte[] frameBytes = new byte[data.Length];
+                    data.CopyTo(frameBytes);
 
-                        FrameData frameData = new FrameData(frameBytes, rTex.width, rTex.height, currentTime);
-                        frameQueue.Enqueue(frameData);
-                    });
-                    nextTime += timeInterval;
-                }
-                else await UniTask.Yield();
+                    FrameData frameData = new FrameData(frameBytes, rTex.width, rTex.height, currentTime);
+                    frameQueue.Enqueue(frameData);
+                });
 
-                //await UniTask.Delay(TimeSpan.FromMilliseconds(1000f / requestedFPS), cancellationToken: token);
+                await UniTask.Delay(TimeSpan.FromMilliseconds(1000f / requestedFPS), cancellationToken: token);
             }
         }
 

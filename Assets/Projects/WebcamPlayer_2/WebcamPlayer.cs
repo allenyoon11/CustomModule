@@ -74,6 +74,7 @@ namespace neuroears.allen.utils.webcam2
             {
                 this.fps = (int)wTex.requestedFPS;
             }
+            Debug.Log($"{width}x{height} | {fps}");
         }
     }
 
