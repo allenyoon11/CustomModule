@@ -9,11 +9,13 @@ using UnityEngine.Video;
 public class FramePlayerTester : MonoBehaviour
 {
     public RawImage rawImage;
-    public string filename = "";
+    public string filename = "test";
+    public string extension = "mp4";
 
     private string dir;
     private VideoPlayer videoPlayer;
     private bool isPrepared = false;
+    private string loadedFileName;
 
     private void Awake()
     {
@@ -21,9 +23,8 @@ public class FramePlayerTester : MonoBehaviour
     }
     void Start()
     {
-        
-
         SetSubscribe();
+        Debug.LogWarning("DEV::press 'O' to open directory");
     }
 
     private void SetSubscribe()
@@ -39,22 +40,24 @@ public class FramePlayerTester : MonoBehaviour
             .Where(_ => Input.GetKeyDown(KeyCode.Space))
             .Subscribe(_ =>
             {
-                if (!isPrepared || !videoPlayer.isPrepared)
+                if (!isPrepared || !videoPlayer.isPrepared || filename != loadedFileName)
                 {
+                    ReleaseVideo();
                     LoadVideo();
                     return;
                 }
                 long nextFrame = videoPlayer.frame + 1;
 
                 if (nextFrame < (long)videoPlayer.frameCount)
-                {
+                { 
                     videoPlayer.frame = nextFrame;
                     videoPlayer.Play();
                     videoPlayer.Pause();
 
                     if (videoPlayer.texture != null)
                     {
-                        rawImage.texture = videoPlayer.texture;
+                        SetTexture(videoPlayer.texture);
+                        Debug.Log($"{nextFrame}/{videoPlayer.frameCount}");
                     }
                 }
                 else
@@ -69,7 +72,9 @@ public class FramePlayerTester : MonoBehaviour
         videoPlayer = gameObject.AddComponent<VideoPlayer>();
 
         // 2. 설정
-        string fullPath = Path.Combine(dir, filename);
+        string fullPath = Path.Combine(dir, $"{filename}.{extension}");
+        Debug.Log($"Load Video {fullPath}");
+
         string videoUrl = "file://" + fullPath;
         videoPlayer.source = VideoSource.Url;
         videoPlayer.url = videoUrl;
@@ -84,6 +89,33 @@ public class FramePlayerTester : MonoBehaviour
 
         // 4. 로드 시작
         videoPlayer.Prepare();
+        loadedFileName = filename;
+    }
+    private void ReleaseVideo()
+    {
+        isPrepared = false;
+        loadedFileName = null;
+
+        if (videoPlayer != null)
+        {
+            // 1. 이벤트 제거
+            videoPlayer.prepareCompleted -= OnVideoPrepared;
+
+            // 2. 재생 중지
+            if (videoPlayer.isPlaying)
+                videoPlayer.Stop();
+
+            // 3. RenderTexture 해제 (선택적)
+            if (videoPlayer.targetTexture != null)
+            {
+                videoPlayer.targetTexture.Release();
+                videoPlayer.targetTexture = null;
+            }
+
+            // 4. VideoPlayer 제거
+            Destroy(videoPlayer);
+            videoPlayer = null;
+        }
     }
     private void OnVideoPrepared(VideoPlayer vp)
     {
@@ -95,7 +127,15 @@ public class FramePlayerTester : MonoBehaviour
 
         if (vp.texture != null)
         {
-            rawImage.texture = vp.texture;
+            SetTexture(vp.texture);
         }
+    }
+    private void SetTexture(Texture tex)
+    {
+        float ratio = (float)tex.width / tex.height;
+        Debug.Log($"{tex.width}x{tex.height} | {ratio}");
+        rawImage.GetComponent<AspectRatioFitter>().aspectRatio = ratio;
+        rawImage.texture = tex;
+
     }
 }
