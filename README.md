@@ -12,6 +12,32 @@
 - UniRx / UniTask 비동기·리액티브 유틸리티
 - Protobuf / Newtonsoft 기반 직렬화 유틸리티
 
+**3rd Party 라이브러리 설명**
+
+이 프로젝트는 다음의 주요 서드파티 라이브러리와 플러그인을 사용합니다:
+
+| 라이브러리                                 | 버전   | 용도                                                                    | 위치                                                                         |
+| ------------------------------------------ | ------ | ----------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| **OpenCVForUnity**                         | -      | 이미지/비디오 처리, 얼굴 인식, 객체 감지 등 컴퓨터 비전 작업            | `Assets/3rd Party/OpenCVForUnity/`, `Assets/StreamingAssets/OpenCVForUnity/` |
+| **Shapes**                                 | -      | 기하학적 도형(원, 사각형, 선 등) 렌더링을 위한 고성능 드로잉 라이브러리 | `Assets/3rd Party/Shapes/`                                                   |
+| **FFmpegOut**                              | -      | FFmpeg 기반 비디오/오디오 인코딩 및 실시간 녹화                         | `Assets/StreamingAssets/FFmpegOut/`, `Assets/Projects/FFmpegRecorder/`       |
+| **TextMesh Pro**                           | -      | Unity 기본 텍스트 렌더링 대체용, 고급 텍스트 포맷팅 및 애니메이션       | `Assets/TextMesh Pro/`                                                       |
+| **Google.Protobuf**                        | 3.29.2 | Protocol Buffers 직렬화 라이브러리, 데이터 구조 정의 및 직렬화          | `Assets/Packages/Google.Protobuf.3.29.2/`                                    |
+| **Newtonsoft.Json (Json.NET)**             | 13.0.3 | JSON 직렬화/역직렬화 유틸리티                                           | `Assets/Packages/Newtonsoft.Json.13.0.3/`, `Assets/Projects/JsonSerializer/` |
+| **System.Runtime.CompilerServices.Unsafe** | 4.5.2  | Google.Protobuf의 의존성, 저수준 메모리 작업                            | `Assets/Packages/System.Runtime.CompilerServices.Unsafe.4.5.2/`              |
+| **UniRx**                                  | 7.1.0  | Reactive Extensions for Unity, 비동기 이벤트 처리 및 Observable 패턴    | OpenUPM (`com.neuecc.unirx`)                                                 |
+| **UniTask**                                | 2.4.0  | Unity용 경량 async/await 구현, 비동기 작업 간소화                       | OpenUPM (`com.cysharp.unitask`)                                              |
+| **Zenject (Extenject)**                    | -      | Dependency Injection 컨테이너, 느슨한 결합 및 테스트 용이성 증대        | `.csproj` 파일에 정의                                                        |
+
+**각 라이브러리 사용 예시**
+
+- **OpenCVForUnity**: 웹캠 영상 처리, 얼굴 인식 필터 등 (`Assets/Projects/WebcamPlayer/`, `Assets/Projects/OpenCVRecorder/`)
+- **FFmpegOut**: 실시간 비디오 녹화 및 인코딩 (`Assets/Projects/FFmpegRecorder/FFmpegRecorder.cs`)
+- **UniTask**: 비동기 파일 I/O, 네트워크 통신 (`Assets/Projects/FileIOHelper/`, `Assets/Projects/TcpFileUpload/`)
+- **Protobuf/Json**: 데이터 직렬화 및 저장 (`Assets/Projects/ProtobufSerializer/`, `Assets/Projects/JsonSerializer/`)
+- **Shapes**: 실시간 그래프 및 차트 렌더링 (`Assets/Projects/Graph/`)
+- **TextMesh Pro**: 고급 UI 텍스트 표시 및 포맷팅 (`Assets/TextMesh Pro/Examples & Extras/`)
+
 **권장 요구사항**
 
 - Unity Editor 버전: 프로젝트 파일에 기록된 `UnityVersion: 6000.2.7f2` (프로젝트와 동일하거나 호환되는 Unity 버전 사용 권장). Editor 경로는 환경에 따라 다릅니다.
